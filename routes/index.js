@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 
 /* GET home page. */
+
+// Renders Inital
 router.get('/', function(req, res, next){
   try {
     req.db.query('SELECT * FROM todos;', (err, results) => {
@@ -17,6 +19,7 @@ router.get('/', function(req, res, next){
   }
 });
 
+// Creates Task
 router.post('/create', function (req, res, next) {
     const { task } = req.body;
     try {
@@ -35,6 +38,7 @@ router.post('/create', function (req, res, next) {
     }
 });
 
+// Deletes Task
 router.post('/delete', function (req, res, next) {
     const { id } = req.body;
     try {
@@ -52,5 +56,53 @@ router.post('/delete', function (req, res, next) {
         res.status(500).send('Error deleting todo:');
     }
 });
+
+// Edits a task
+router.post('/edit', function (req, res, next) {
+    const { id } = req.body;
+    const { editor } = req.body;
+    try {
+      // edit task description 
+      req.db.query('UPDATE todos SET task = ? WHERE id = ?;', [editor, id], (err, results) => {
+
+        if (err) {
+          console.error('Error editing todo:', err);
+          return res.status(500).send('Error adding todo');
+        }
+        console.log('Todo edited successfully:', results);
+        // Redirect to the home page after adding
+        res.redirect('/');
+      });
+
+    } catch (error) {
+      console.error('Error editing todo:', error);
+      res.status(500).send('Error editing todo');
+      
+    }
+});
+
+// Switches the value of "complete" when the "complete" button is pressed
+router.post('/complete', function (req, res, next) {
+    const { id } = req.body;
+    try {
+      // edit task description 
+      req.db.query('UPDATE todos SET completed = NOT completed WHERE id = ?;', [id], (err, results) => {
+
+        if (err) {
+          console.error('Error completing task:', err);
+          return res.status(500).send('Error completing task');
+        }
+        console.log('Todo completed successfully:', results);
+        // Redirect to the home page after adding
+        res.redirect('/');
+      });
+
+    } catch (error) {
+      console.error('Error completing task:', error);
+      res.status(500).send('Error completing task');
+      
+    }
+});
+
 
 module.exports = router;
